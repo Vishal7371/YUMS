@@ -23,19 +23,6 @@
     <h1 class="login-minimal-title">YUMS</h1>
     <p class="login-minimal-sub">LPU Attendance Tracker</p>
 
-    <div class="login-fields">
-      <div class="input-wrap">
-        <input id="regNo" type="text" class="form-input" placeholder="Registration Number"
-          autocomplete="off" />
-        <span class="input-icon">🪪</span>
-      </div>
-      <div class="input-wrap">
-        <input id="password" type="password" class="form-input" placeholder="UMS Password"
-          autocomplete="off" onkeydown="if(event.key==='Enter') startLogin()" />
-        <span class="input-icon">🔒</span>
-      </div>
-    </div>
-
     <div id="loginError" class="error-msg hidden"></div>
     <div id="loginInfo"  class="info-msg  hidden"></div>
 
@@ -44,7 +31,7 @@
       <span id="loginSpinner" class="spinner hidden"></span>
     </button>
 
-    <p class="privacy-note">🔒 Your password is sent securely via HTTPS and <strong>never stored</strong>.</p>
+    <p class="privacy-note">🔒 Your password is <strong>never</strong> stored — you enter it in the UMS window.</p>
   </div>
 
   <script src="app.js"></script>

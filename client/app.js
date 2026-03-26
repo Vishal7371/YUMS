@@ -1,6 +1,4 @@
-const API_BASE = window.location.hostname === 'localhost'
-    ? 'http://localhost:3001/api'
-    : 'https://yums-server.onrender.com/api';
+const API_BASE = 'http://localhost:3001/api';
 const TREND_KEY = 'yums_trend';
 
 /* ── Helpers ── */
@@ -191,27 +189,17 @@ if ($('loginBtn')) {
 }
 
 async function startLogin() {
-    const regNo    = $('regNo')?.value.trim();
-    const password = $('password')?.value;
     const errorDiv = $('loginError');
     const infoDiv  = $('loginInfo');
 
-    if (!regNo || !password) {
-        errorDiv.textContent = 'Please enter both Registration Number and Password.';
-        show('loginError'); return;
-    }
-
-    sessionStorage.setItem('yums_regNo', regNo);
-    localStorage.setItem('yums_regNo', regNo);
-
     hide('loginError');
     $('loginBtn').disabled = true;
-    $('loginBtnText').textContent = 'Logging in…';
+    $('loginBtnText').textContent = 'Opening UMS…';
     show('loginSpinner');
-    infoDiv.innerHTML = '🌐 <strong>Connecting to UMS…</strong> This may take a moment.';
+    infoDiv.innerHTML = '🌐 <strong>Opening UMS…</strong> Log in with your credentials in the browser window.';
     show('loginInfo');
 
-    const url = `${API_BASE}/login/stream?regNo=${encodeURIComponent(regNo)}&password=${encodeURIComponent(password)}`;
+    const url = `${API_BASE}/login/stream`;
     const es = new EventSource(url);
 
     es.addEventListener('progress', (e) => {

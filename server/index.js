@@ -45,7 +45,7 @@ app.get('/api/login/stream', async (req, res) => {
         return res.end();
     }
 
-    const { regNo = '', password = '' } = req.query;
+    const { regNo = '' } = req.query;
 
     // SSE headers
     res.writeHead(200, {
@@ -87,7 +87,7 @@ app.get('/api/login/stream', async (req, res) => {
             send('progress', { msg });
         };
 
-        const finalData = await loginAndFetchAttendance({ regNo, password, onAttendance, onProgress });
+        const finalData = await loginAndFetchAttendance({ regNo, onAttendance, onProgress });
         send('done', finalData);
 
     } catch (err) {
@@ -105,10 +105,10 @@ app.post('/api/login', async (req, res) => {
     if (sessionInProgress) {
         return res.status(429).json({ error: 'A session is already in progress.' });
     }
-    const { regNo = '', password = '' } = req.body;
+    const { regNo = '' } = req.body;
     sessionInProgress = true;
     try {
-        const result = await loginAndFetchAttendance({ regNo, password });
+        const result = await loginAndFetchAttendance({ regNo });
         res.json({ success: true, ...result });
     } catch (err) {
         res.status(500).json({ error: err.message || 'Failed.' });

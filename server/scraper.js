@@ -57,13 +57,12 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 function launchBrowser() {
   return puppeteer.launch({
-    headless: 'new',
-    defaultViewport: { width: 1280, height: 800 },
+    headless: false,
+    defaultViewport: null,
     args: [
+      '--start-maximized',
       '--no-sandbox',
       '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-gpu',
       '--disable-blink-features=AutomationControlled',
     ],
   });
@@ -538,44 +537,11 @@ async function loginAndFetchAttendance({ regNo = '', password = '', onAttendance
       await loginPage.goto(UMS_LOGIN, { waitUntil: 'domcontentloaded', timeout: 30000 });
       await sleep(2000);
 
-      if (regNo && password) {
-        progress('✏️ Filling credentials…');
-        await autofillCredentials(loginPage, regNo, password);
+      progress('✋ Please log in with your credentials in the browser window');
 
-        progress('🔍 Solving CAPTCHA…');
-        const captchaSolved = await fillAndSubmitCaptcha(loginPage);
-        if (!captchaSolved) {
-          throw new Error('Could not solve CAPTCHA automatically. Please try again.');
-        }
-
-        progress('⏳ Waiting for UMS to log in…');
-        await sleep(5000);
-
-        const currentUrl = loginPage.url().toLowerCase();
-        if (currentUrl.includes('studentdashboard') || currentUrl.includes('default3')) {
-          dashPage = loginPage;
-        } else {
-          dashPage = await waitForDashboard(browser, 30000);
-        }
-      } else if (regNo) {
-        progress('✏️ Filling Registration Number…');
-        await autofillCredentials(loginPage, regNo, '');
-      }
-
-      if (!dashPage) {
-        dashPage = await waitForDashboard(browser, 15000);
-      }
-
-      if (!dashPage) {
-        const errorText = await safeEval(loginPage, () => {
-          const errEl = document.querySelector('.ErrorLabelCredentials, [id*="ErrorLabel"], .alert-danger, [id*="error"]');
-          return errEl ? errEl.innerText.trim() : '';
-        }).catch(() => '');
-        if (errorText) {
-          throw new Error(`UMS login error: ${errorText}`);
-        }
-        throw new Error('Login failed — could not reach UMS dashboard. Check your credentials and try again.');
-      }
+      progress('⏳ Waiting for UMS dashboard…');
+      dashPage = await waitForDashboard(browser, 180000);
+      if (!dashPage) throw new Error('Login timeout — dashboard not detected within 3 minutes.');
     }
 
     progress('📊 Dashboard detected — reading your attendance…');
