@@ -1,0 +1,17 @@
+{
+  "name": "YUMS – Attendance Tracker",
+  "short_name": "YUMS",
+  "description": "LPU attendance tracker — view, analyse and stay on top of your attendance.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080B14",
+  "theme_color": "#7C6BFF",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

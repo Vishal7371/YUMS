@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YUMS – Trend</title>
+    <link rel="manifest" href="manifest.json" /><meta name="theme-color" content="#111111" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" /></noscript>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body class="dashboard-body">
+<div id="toastContainer" class="toast-container"></div>
+<aside class="sidebar">
+    <div class="sidebar-brand"><div class="sidebar-logo">🎓</div><span class="sidebar-name">YUMS</span></div>
+    <nav class="sidebar-nav">
+        <span class="sidebar-section-label">Menu</span>
+        <a class="sidebar-nav-item" href="dashboard.html"><span class="sidebar-nav-icon">🏠</span>Home</a>
+        <a class="sidebar-nav-item" href="attendance.html"><span class="sidebar-nav-icon">📋</span>Attendance</a>
+        <a class="sidebar-nav-item" href="calculator.html"><span class="sidebar-nav-icon">🧮</span>Calculator</a>
+        <a class="sidebar-nav-item" href="planner.html"><span class="sidebar-nav-icon">🗓️</span>Planner</a>
+        <a class="sidebar-nav-item active" href="trend.html"><span class="sidebar-nav-icon">📈</span>Trend</a>
+        <a class="sidebar-nav-item" href="cgpa.html"><span class="sidebar-nav-icon">⭐</span>CGPA</a>
+        <span class="sidebar-section-label">Settings</span>
+        <button class="sidebar-nav-item" onclick="toggleTheme()"><span class="sidebar-nav-icon" id="themeIcon">🌙</span><span id="themeLabel">Dark Mode</span></button>
+    </nav>
+    <div class="sidebar-footer">
+        <button id="refreshBtn" class="sidebar-nav-item" style="color:rgba(255,255,255,0.45)"><span class="sidebar-nav-icon">↻</span>Refresh Data</button>
+        <button id="logoutBtn" class="sidebar-nav-item" style="color:#FCA5A5"><span class="sidebar-nav-icon">🚪</span>Logout</button>
+    </div>
+</aside>
+<div class="content-area">
+    <header class="topbar">
+        <div class="topbar-left"><h1>Trend</h1><p>Your attendance history &amp; prediction</p></div>
+        <div class="topbar-right">
+            <div class="user-chip">
+                <div class="user-avatar" id="topbarAvatar">V</div>
+                <div class="user-info"><span class="user-name" id="topbarName">Loading…</span><span class="user-role" id="topbarRole">LPU Student</span></div>
+            </div>
+        </div>
+    </header>
+    <main class="main-content" id="trendPage">
+        <div class="welcome-strip">
+            <h2>Attendance Trend &amp; Prediction</h2>
+            <p>Tracks your overall attendance every login. Dashed yellow line = predicted trajectory.</p>
+        </div>
+
+        <!-- Subject selector -->
+        <div class="panel" style="margin-bottom:16px">
+            <div class="panel-header">
+                <span class="panel-title"><span class="panel-title-icon">🔍</span>View</span>
+            </div>
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+                <select id="subjectTrendSelect" class="planner-select" style="flex:1;min-width:200px"><option value="">— Overall trend —</option></select>
+                <span style="font-size:12px;color:var(--text-3)">Switch between overall and per-subject trends</span>
+            </div>
+        </div>
+
+        <!-- No data message -->
+        <div id="noTrendMsg" class="state-container hidden">
+            <p class="state-icon">📈</p>
+            <p style="color:var(--text-2);font-size:14px">No trend data yet. Log in at least twice to see your attendance trend.</p>
+            <a href="dashboard.html" class="btn btn-outline" style="margin-top:16px;width:auto;padding:10px 24px">← Back to Home</a>
+        </div>
+
+        <!-- Overall Trend Chart -->
+        <div id="trendSection" class="panel hidden">
+            <div class="panel-header">
+                <span class="panel-title"><span class="panel-title-icon">📈</span>Overall Attendance Over Time</span>
+                <div class="panel-actions">
+                    <button class="btn btn-outline btn-sm" onclick="clearTrend()">🗑 Clear</button>
+                </div>
+            </div>
+            <canvas id="trendChart" class="trend-canvas" height="160"></canvas>
+            <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--text-3)">
+                <span>● Colored dots = actual data points</span>
+                <span style="color:rgba(252,211,77,0.9)">- - Dashed yellow = AI prediction</span>
+                <span style="color:rgba(245,197,66,.7)">— Dashed line = 75% target</span>
+            </div>
+        </div>
+
+        <!-- Per-subject trend chart -->
+        <div id="subjectTrendSection" class="panel hidden">
+            <div class="panel-header">
+                <span class="panel-title"><span class="panel-title-icon">📊</span>Subject Trend</span>
+            </div>
+            <div id="noSubjectTrendMsg" class="state-container hidden">
+                <p style="color:var(--text-2);font-size:13px">No per-subject data yet. Log in again to start tracking this subject.</p>
+            </div>
+            <canvas id="subjectTrendChart" class="trend-canvas" height="140" style="display:none"></canvas>
+        </div>
+
+        <!-- Daily Reminder -->
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title"><span class="panel-title-icon">🔔</span>Daily Reminder</span>
+            </div>
+            <p style="font-size:13px;color:var(--text-2);margin-bottom:14px">Get a daily notification if any subject is below 75%.</p>
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+                <input id="reminderTime" type="time" class="goal-input" style="width:120px;font-size:15px;padding:8px 10px" value="08:00" />
+                <button class="btn btn-primary" style="width:auto;padding:10px 20px" onclick="enableNotifications().then?.(()=>scheduleDailyReminder())||scheduleDailyReminder()">
+                    Set Reminder
+                </button>
+                <span style="font-size:12px;color:var(--text-3)">Requires notification permission</span>
+            </div>
+        </div>
+    </main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

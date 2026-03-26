@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YUMS – CGPA Tracker</title>
+    <link rel="manifest" href="manifest.json" /><meta name="theme-color" content="#111111" />
+    <meta name="description" content="YUMS — Track your CGPA, grades and credits per subject." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" /></noscript>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        /* ── CGPA Hero ──────────────────────────────────────────── */
+        .cgpa-hero {
+            background: linear-gradient(135deg, rgba(124,107,255,.15), rgba(79,142,247,.1));
+            border: 1px solid rgba(124,107,255,.2);
+            border-radius: 20px;
+            padding: 28px 24px;
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        .cgpa-ring-wrap { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
+        .cgpa-ring-svg { width: 120px; height: 120px; }
+        .cgpa-ring-label {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .cgpa-ring-val {
+            font-size: 26px; font-weight: 800;
+            background: linear-gradient(135deg,#7C6BFF,#4F8EF7);
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+        }
+        .cgpa-ring-lbl { font-size: 11px; color: var(--text-3); margin-top: 3px; font-weight: 600; }
+
+        .cgpa-hero-stats { display: flex; gap: 28px; flex-wrap: wrap; flex: 1; }
+        .cgpa-stat { display: flex; flex-direction: column; gap: 3px; }
+        .cgpa-stat-val { font-size: 24px; font-weight: 800; color: var(--text); line-height: 1; }
+        .cgpa-stat-lbl { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: .5px; }
+
+        /* ── Grade Table ────────────────────────────────────────── */
+        .grade-table-wrap { overflow-x: auto; margin-top: 4px; }
+        .grade-table {
+            width: 100%; border-collapse: collapse;
+            font-size: 13px;
+        }
+        .grade-table th {
+            padding: 10px 14px;
+            text-align: left; font-size: 11px;
+            color: var(--text-3); font-weight: 700;
+            text-transform: uppercase; letter-spacing: .5px;
+            border-bottom: 1px solid var(--border);
+        }
+        .grade-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(255,255,255,.04);
+            color: var(--text);
+            vertical-align: middle;
+        }
+        .grade-table tr:last-child td { border-bottom: none; }
+        .grade-table tr:hover td { background: rgba(255,255,255,.025); }
+
+        .grade-pill {
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 3px 10px; border-radius: 8px;
+            font-size: 12px; font-weight: 700; min-width: 36px;
+        }
+        .grade-pill.A\+ { background: rgba(45,212,163,.15); color: #2DD4A3; }
+        .grade-pill.A  { background: rgba(45,212,163,.12); color: #34D399; }
+        .grade-pill.B\+ { background: rgba(79,142,247,.15); color: #60A5FA; }
+        .grade-pill.B  { background: rgba(79,142,247,.12); color: #93C5FD; }
+        .grade-pill.C\+ { background: rgba(245,197,66,.12); color: #F5C542; }
+        .grade-pill.C  { background: rgba(245,197,66,.10); color: #FBBF24; }
+        .grade-pill.D  { background: rgba(255,107,138,.12); color: #FF6B8A; }
+        .grade-pill.F  { background: rgba(239,68,68,.15); color: #F87171; }
+        .grade-pill.default { background: rgba(255,255,255,.07); color: var(--text-2); }
+
+        .credit-bar-wrap { min-width: 80px; }
+        .credit-bar {
+            height: 6px; background: rgba(255,255,255,.07);
+            border-radius: 4px; overflow: hidden;
+        }
+        .credit-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg,#7C6BFF,#4F8EF7);
+            border-radius: 4px;
+            transition: width .6s ease;
+        }
+
+        /* ── GPA Simulator ──────────────────────────────────────── */
+        .sim-header {
+            display: flex; justify-content: space-between;
+            align-items: center; flex-wrap: wrap; gap: 12px;
+        }
+        .sim-result-chip {
+            background: rgba(124,107,255,.15);
+            border: 1px solid rgba(124,107,255,.25);
+            border-radius: 12px; padding: 8px 16px;
+            font-size: 14px; font-weight: 700;
+            color: #a78bfa;
+            transition: all .3s;
+        }
+        .sim-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 12px; }
+        .sim-table th {
+            padding: 8px 12px; text-align: left;
+            font-size: 11px; color: var(--text-3);
+            font-weight: 700; text-transform: uppercase;
+            letter-spacing: .5px; border-bottom: 1px solid var(--border);
+        }
+        .sim-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,.04); }
+        .sim-table tr:last-child td { border-bottom: none; }
+        .sim-table tr:hover td { background: rgba(255,255,255,.025); }
+
+        .sim-grade-select {
+            background: var(--subtle); border: 1px solid var(--border);
+            border-radius: 8px; padding: 5px 8px;
+            color: var(--text); font-size: 12px; font-family: inherit;
+            cursor: pointer; width: 100%;
+        }
+        .sim-grade-select:focus { outline: none; border-color: var(--accent); }
+
+        /* ── No data state ──────────────────────────────────────── */
+        .cgpa-no-data {
+            text-align: center; padding: 56px 24px;
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 16px; color: var(--text-3);
+        }
+        .cgpa-no-data span { font-size: 48px; display: block; margin-bottom: 14px; }
+        .cgpa-no-data p { font-size: 14px; max-width: 360px; margin: 0 auto 20px; line-height: 1.6; }
+
+        /* ── Credit donut legend ────────────────────────────────── */
+        .credit-summary {
+            display: flex; flex-wrap: wrap; gap: 10px; padding-top: 4px;
+        }
+        .credit-chip {
+            background: var(--subtle); border: 1px solid var(--border);
+            border-radius: 10px; padding: 8px 14px;
+            display: flex; flex-direction: column; gap: 2px;
+        }
+        .credit-chip-val { font-size: 20px; font-weight: 800; color: var(--text); line-height: 1; }
+        .credit-chip-lbl { font-size: 11px; color: var(--text-3); }
+    </style>
+</head>
+<body class="dashboard-body">
+<div id="toastContainer" class="toast-container"></div>
+<aside class="sidebar">
+    <div class="sidebar-brand"><div class="sidebar-logo">🎓</div><span class="sidebar-name">YUMS</span></div>
+    <nav class="sidebar-nav">
+        <span class="sidebar-section-label">Menu</span>
+        <a class="sidebar-nav-item" href="dashboard.html"><span class="sidebar-nav-icon">🏠</span>Home</a>
+        <a class="sidebar-nav-item" href="attendance.html"><span class="sidebar-nav-icon">📋</span>Attendance</a>
+        <a class="sidebar-nav-item" href="calculator.html"><span class="sidebar-nav-icon">🧮</span>Calculator</a>
+        <a class="sidebar-nav-item" href="planner.html"><span class="sidebar-nav-icon">🗓️</span>Planner</a>
+        <a class="sidebar-nav-item" href="trend.html"><span class="sidebar-nav-icon">📈</span>Trend</a>
+        <a class="sidebar-nav-item active" href="cgpa.html"><span class="sidebar-nav-icon">⭐</span>CGPA</a>
+        <span class="sidebar-section-label">Settings</span>
+        <button class="sidebar-nav-item" onclick="toggleTheme()"><span class="sidebar-nav-icon" id="themeIcon">🌙</span><span id="themeLabel">Dark Mode</span></button>
+    </nav>
+    <div class="sidebar-footer">
+        <button id="refreshBtn" class="sidebar-nav-item" style="color:rgba(255,255,255,0.45)"><span class="sidebar-nav-icon">↻</span>Refresh Data</button>
+        <button id="logoutBtn" class="sidebar-nav-item" style="color:#FCA5A5"><span class="sidebar-nav-icon">🚪</span>Logout</button>
+    </div>
+</aside>
+
+<div class="content-area">
+    <header class="topbar">
+        <div class="topbar-left"><h1>CGPA Tracker</h1><p>Grades, credits &amp; GPA simulator</p></div>
+        <div class="topbar-right">
+            <div class="user-chip">
+                <div class="user-avatar" id="topbarAvatar">V</div>
+                <div class="user-info"><span class="user-name" id="topbarName">Loading…</span><span class="user-role" id="topbarRole">LPU Student</span></div>
+            </div>
+        </div>
+    </header>
+    <main class="main-content" id="cgpaPage">
+        <div class="welcome-strip">
+            <h2>⭐ CGPA &amp; Grade Tracker</h2>
+            <p>View your current CGPA, subject-wise credits &amp; grades, and simulate how upcoming results will affect your GPA.</p>
+        </div>
+        <!-- Dynamic content rendered by initCgpaPage() -->
+        <div id="cgpaContent"></div>
+    </main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YUMS – Attendance</title>
+    <link rel="manifest" href="manifest.json" /><meta name="theme-color" content="#111111" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" /></noscript>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body class="dashboard-body">
+<div id="toastContainer" class="toast-container"></div>
+<aside class="sidebar">
+    <div class="sidebar-brand"><div class="sidebar-logo">🎓</div><span class="sidebar-name">YUMS</span></div>
+    <nav class="sidebar-nav">
+        <span class="sidebar-section-label">Menu</span>
+        <a class="sidebar-nav-item" href="dashboard.html"><span class="sidebar-nav-icon">🏠</span>Home</a>
+        <a class="sidebar-nav-item active" href="attendance.html"><span class="sidebar-nav-icon">📋</span>Attendance</a>
+        <a class="sidebar-nav-item" href="calculator.html"><span class="sidebar-nav-icon">🧮</span>Calculator</a>
+        <a class="sidebar-nav-item" href="planner.html"><span class="sidebar-nav-icon">🗓️</span>Planner</a>
+        <a class="sidebar-nav-item" href="trend.html"><span class="sidebar-nav-icon">📈</span>Trend</a>
+        <a class="sidebar-nav-item" href="cgpa.html"><span class="sidebar-nav-icon">⭐</span>CGPA</a>
+        <span class="sidebar-section-label">Actions</span>
+        <button class="sidebar-nav-item" onclick="copyStats()"><span class="sidebar-nav-icon">📋</span>Copy Report</button>
+        <button class="sidebar-nav-item" onclick="whatsappShare()"><span class="sidebar-nav-icon">💬</span>WhatsApp Share</button>
+        <button class="sidebar-nav-item" onclick="generateShareImage()"><span class="sidebar-nav-icon">📸</span>Share as Image</button>
+        <span class="sidebar-section-label">Settings</span>
+        <button class="sidebar-nav-item" onclick="toggleTheme()"><span class="sidebar-nav-icon" id="themeIcon">🌙</span><span id="themeLabel">Dark Mode</span></button>
+    </nav>
+    <div class="sidebar-footer">
+        <button id="refreshBtn" class="sidebar-nav-item" style="color:rgba(255,255,255,0.45)"><span class="sidebar-nav-icon">↻</span>Refresh Data</button>
+        <button id="logoutBtn" class="sidebar-nav-item" style="color:#FCA5A5"><span class="sidebar-nav-icon">🚪</span>Logout</button>
+    </div>
+</aside>
+<div class="content-area">
+    <header class="topbar">
+        <div class="topbar-left"><h1>Attendance</h1><p>Subject-wise attendance breakdown</p></div>
+        <div class="topbar-right">
+            <div class="live-badge"><span class="live-dot"></span><span class="live-txt">Live</span></div>
+            <div class="user-chip">
+                <div class="user-avatar" id="topbarAvatar">V</div>
+                <div class="user-info"><span class="user-name" id="topbarName">Loading…</span><span class="user-role" id="topbarRole">LPU Student</span></div>
+            </div>
+        </div>
+    </header>
+    <main class="main-content" id="attendancePage">
+        <div class="welcome-strip" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+            <div>
+                <h2>Subject-wise Attendance</h2>
+                <p id="fetchTimeStrip">Fetched live from UMS</p>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn btn-outline btn-sm" onclick="whatsappShare()">💬 WhatsApp</button>
+                <button class="btn btn-outline btn-sm" onclick="generateShareImage()">📸 Share Image</button>
+                <button class="btn btn-outline btn-sm" onclick="copyStats()">📋 Copy</button>
+            </div>
+        </div>
+
+        <div id="loadingState" class="state-container"><div class="loader"></div><p>Loading your attendance…</p></div>
+        <div id="errorState" class="state-container hidden">
+            <p class="state-icon">⚠️</p><p id="errorMsg">Failed to load attendance.</p>
+            <button onclick="sessionStorage.clear();localStorage.removeItem('yums_subjects');window.location.href='index.html'" class="btn btn-primary" style="width:auto;padding:12px 32px;margin-top:8px">Try Again</button>
+        </div>
+
+        <div id="gridWrapper" class="hidden">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title"><span class="panel-title-icon">📋</span>All Subjects</span>
+                    <div class="panel-actions">
+                        <button class="btn btn-outline btn-sm sort-btn active" id="sortAsc" onclick="sortCards('asc')">↑ Worst first</button>
+                        <button class="btn btn-outline btn-sm sort-btn" id="sortDesc" onclick="sortCards('desc')">↓ Best first</button>
+                    </div>
+                </div>
+                <section id="subjectsGrid" class="subjects-grid"></section>
+            </div>
+        </div>
+    </main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
