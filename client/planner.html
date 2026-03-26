@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YUMS – Bunk Planner</title>
+    <link rel="manifest" href="manifest.json" /><meta name="theme-color" content="#111111" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" /></noscript>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body class="dashboard-body">
+<div id="toastContainer" class="toast-container"></div>
+<aside class="sidebar">
+    <div class="sidebar-brand"><div class="sidebar-logo">🎓</div><span class="sidebar-name">YUMS</span></div>
+    <nav class="sidebar-nav">
+        <span class="sidebar-section-label">Menu</span>
+        <a class="sidebar-nav-item" href="dashboard.html"><span class="sidebar-nav-icon">🏠</span>Home</a>
+        <a class="sidebar-nav-item" href="attendance.html"><span class="sidebar-nav-icon">📋</span>Attendance</a>
+        <a class="sidebar-nav-item" href="calculator.html"><span class="sidebar-nav-icon">🧮</span>Calculator</a>
+        <a class="sidebar-nav-item active" href="planner.html"><span class="sidebar-nav-icon">🗓️</span>Planner</a>
+        <a class="sidebar-nav-item" href="trend.html"><span class="sidebar-nav-icon">📈</span>Trend</a>
+        <a class="sidebar-nav-item" href="cgpa.html"><span class="sidebar-nav-icon">⭐</span>CGPA</a>
+        <span class="sidebar-section-label">Settings</span>
+        <button class="sidebar-nav-item" onclick="toggleTheme()"><span class="sidebar-nav-icon" id="themeIcon">🌙</span><span id="themeLabel">Dark Mode</span></button>
+    </nav>
+    <div class="sidebar-footer">
+        <button id="refreshBtn" class="sidebar-nav-item" style="color:rgba(255,255,255,0.45)"><span class="sidebar-nav-icon">↻</span>Refresh Data</button>
+        <button id="logoutBtn" class="sidebar-nav-item" style="color:#FCA5A5"><span class="sidebar-nav-icon">🚪</span>Logout</button>
+    </div>
+</aside>
+<div class="content-area">
+    <header class="topbar">
+        <div class="topbar-left"><h1>Bunk Planner</h1><p>Simulate skipping classes before you do</p></div>
+        <div class="topbar-right">
+            <div class="user-chip">
+                <div class="user-avatar" id="topbarAvatar">V</div>
+                <div class="user-info"><span class="user-name" id="topbarName">Loading…</span><span class="user-role" id="topbarRole">LPU Student</span></div>
+            </div>
+        </div>
+    </header>
+    <main class="main-content" id="plannerPage">
+        <div class="welcome-strip">
+            <h2>🗓️ Bunk Planner</h2>
+            <p>Enter how many classes you want to skip — see the attendance impact instantly.</p>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title"><span class="panel-title-icon">⚙️</span>Planner Settings</span>
+            </div>
+            <div class="planner-inputs">
+                <div class="calc-field">
+                    <label>Days to Skip</label>
+                    <input id="plannerBunkCount" type="number" min="0" max="60" value="1" oninput="renderPlannerResult()" placeholder="e.g. 3" />
+                </div>
+                <div class="calc-field">
+                    <label>Classes per Skipped Day</label>
+                    <input id="plannerClassesPerDay" type="number" min="0.5" max="10" step="0.5" value="1" oninput="renderPlannerResult()" placeholder="e.g. 2" />
+                </div>
+                <div class="calc-field">
+                    <label>Subject (optional)</label>
+                    <select id="plannerSubjectSel" class="planner-select" onchange="renderPlannerResult()"><option value="">Loading…</option></select>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title"><span class="panel-title-icon">📊</span>Impact Simulation</span>
+                <span style="font-size:12px;color:var(--text-3)">Green = still safe · Red = danger zone</span>
+            </div>
+            <div class="planner-table-wrap">
+                <table class="planner-table">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Current %</th>
+                            <th>After Bunking</th>
+                            <th>Change</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="plannerResultBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

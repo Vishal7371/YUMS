@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YUMS – LPU Attendance Tracker</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#111111" />
+  <meta name="description" content="YUMS — Track your LPU UMS attendance instantly." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" /></noscript>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="login-body login-body--minimal">
+
+  <div class="login-minimal-wrap">
+    <div class="login-minimal-logo">🎓</div>
+    <h1 class="login-minimal-title">YUMS</h1>
+    <p class="login-minimal-sub">LPU Attendance Tracker</p>
+
+    <div class="login-fields">
+      <div class="input-wrap">
+        <input id="regNo" type="text" class="form-input" placeholder="Registration Number"
+          autocomplete="off" />
+        <span class="input-icon">🪪</span>
+      </div>
+      <div class="input-wrap">
+        <input id="password" type="password" class="form-input" placeholder="UMS Password"
+          autocomplete="off" onkeydown="if(event.key==='Enter') startLogin()" />
+        <span class="input-icon">🔒</span>
+      </div>
+    </div>
+
+    <div id="loginError" class="error-msg hidden"></div>
+    <div id="loginInfo"  class="info-msg  hidden"></div>
+
+    <button id="loginBtn" class="btn btn-primary login-minimal-btn" onclick="startLogin()">
+      <span id="loginBtnText">Login with UMS</span>
+      <span id="loginSpinner" class="spinner hidden"></span>
+    </button>
+
+    <p class="privacy-note">🔒 Your password is sent securely via HTTPS and <strong>never stored</strong>.</p>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,6 @@
+node_modules/
+.env
+debug_*.html
+debug_*.json
+captcha_*.png
+*.log

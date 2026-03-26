@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YUMS – Home</title>
+    <link rel="manifest" href="manifest.json" /><meta name="theme-color" content="#111111" />
+    <meta name="description" content="YUMS — Your LPU attendance at a glance." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" /></noscript>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body class="dashboard-body">
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- Share Card Preview Modal -->
+<div id="shareModal" class="share-modal hidden">
+    <div class="share-modal-backdrop" onclick="closeShareModal()"></div>
+    <div class="share-modal-box">
+        <div class="share-modal-header">
+            <span>📸 Your Attendance Card</span>
+            <button class="share-modal-close" onclick="closeShareModal()">✕</button>
+        </div>
+        <canvas id="sharePreviewCanvas" class="share-preview-canvas"></canvas>
+        <div class="share-modal-actions">
+            <button class="btn btn-primary" onclick="downloadShareCard()">⬇️ Download PNG</button>
+            <button class="btn btn-outline" onclick="copyShareCardToClipboard()">📋 Copy to Clipboard</button>
+        </div>
+    </div>
+</div>
+
+<!-- Semester Dates Modal -->
+<div id="semesterModal" class="share-modal hidden">
+    <div class="share-modal-backdrop" onclick="closeSemesterModal()"></div>
+    <div class="share-modal-box" style="max-width:360px">
+        <div class="share-modal-header">
+            <span>🗓️ Set Semester Dates</span>
+            <button class="share-modal-close" onclick="closeSemesterModal()">✕</button>
+        </div>
+        <div style="padding:16px;display:flex;flex-direction:column;gap:14px">
+            <div class="form-group">
+                <label class="form-label">Semester Start Date</label>
+                <input type="date" id="semStart" class="form-input" style="padding-left:14px" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Semester End Date</label>
+                <input type="date" id="semEnd" class="form-input" style="padding-left:14px" />
+            </div>
+            <button class="btn btn-primary" onclick="saveSemesterDates()">Save Dates</button>
+        </div>
+    </div>
+</div>
+
+<aside class="sidebar">
+    <div class="sidebar-brand"><div class="sidebar-logo">🎓</div><span class="sidebar-name">YUMS</span></div>
+    <nav class="sidebar-nav">
+        <span class="sidebar-section-label">Menu</span>
+        <a class="sidebar-nav-item active" href="dashboard.html"><span class="sidebar-nav-icon">🏠</span>Home</a>
+        <a class="sidebar-nav-item" href="attendance.html"><span class="sidebar-nav-icon">📋</span>Attendance</a>
+        <a class="sidebar-nav-item" href="calculator.html"><span class="sidebar-nav-icon">🧮</span>Calculator</a>
+        <a class="sidebar-nav-item" href="planner.html"><span class="sidebar-nav-icon">🗓️</span>Planner</a>
+        <a class="sidebar-nav-item" href="trend.html"><span class="sidebar-nav-icon">📈</span>Trend</a>
+        <a class="sidebar-nav-item" href="cgpa.html"><span class="sidebar-nav-icon">⭐</span>CGPA</a>
+        <span class="sidebar-section-label">Actions</span>
+        <button class="sidebar-nav-item" onclick="copyStats()"><span class="sidebar-nav-icon">📋</span>Copy Report</button>
+        <button class="sidebar-nav-item" onclick="whatsappShare()"><span class="sidebar-nav-icon">💬</span>WhatsApp Share</button>
+        <button class="sidebar-nav-item" onclick="generateShareImage()"><span class="sidebar-nav-icon">📸</span>Share Image</button>
+        <button class="sidebar-nav-item" onclick="enableNotifications()"><span class="sidebar-nav-icon">🔔</span>Notifications</button>
+        <span class="sidebar-section-label">Settings</span>
+        <button class="sidebar-nav-item" onclick="toggleTheme()"><span class="sidebar-nav-icon" id="themeIcon">🌙</span><span id="themeLabel">Dark Mode</span></button>
+        <div class="auto-refresh-row">
+            <span class="sidebar-nav-icon">🔄</span>
+            <span style="flex:1;font-size:13px;font-weight:500;color:var(--sidebar-text)">Auto-refresh</span>
+            <select id="autoRefreshInterval" class="ar-select" onchange="setAutoRefresh(this.value)">
+                <option value="0">Off</option>
+                <option value="60">1 hr</option>
+                <option value="180">3 hr</option>
+                <option value="360">6 hr</option>
+            </select>
+        </div>
+    </nav>
+    <div class="sidebar-footer">
+        <button id="refreshBtn" class="sidebar-nav-item" style="color:rgba(255,255,255,0.45)"><span class="sidebar-nav-icon">↻</span>Refresh Data</button>
+        <button id="logoutBtn" class="sidebar-nav-item" style="color:#FCA5A5"><span class="sidebar-nav-icon">🚪</span>Logout</button>
+    </div>
+</aside>
+
+<div class="content-area">
+    <header class="topbar">
+        <div class="topbar-left"><h1>Home</h1><p>Your attendance overview</p></div>
+        <div class="topbar-right">
+            <div class="live-badge"><span class="live-dot"></span><span class="live-txt">Live</span></div>
+            <div class="user-chip">
+                <div class="user-avatar" id="topbarAvatar">V</div>
+                <div class="user-info"><span class="user-name" id="topbarName">Loading…</span><span class="user-role" id="topbarRole">LPU Student</span></div>
+            </div>
+        </div>
+    </header>
+    <main class="main-content" id="homePage">
+        <div class="welcome-strip">
+            <h2 id="welcomeMsg">Welcome back 👋</h2>
+            <p id="fetchTimeStrip">Fetched live from UMS</p>
+        </div>
+
+        <!-- Danger Alert Banner -->
+        <div id="dangerBanner" class="danger-banner hidden"></div>
+
+        <!-- Hero panel -->
+        <div class="hero-panel">
+            <div class="hero-identity">
+                <div class="profile-avatar" id="profileAvatar">V</div>
+                <div class="profile-info">
+                    <p class="profile-name" id="profileName">Loading…</p>
+                    <p class="profile-prog" id="profileProg"></p>
+                    <div style="display:flex; gap:8px; margin-top:6px;">
+                        <span id="cgpaBadge" style="display:none; background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600; color:#fff;"></span>
+                        <span id="rollNoBadge" style="display:none; background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600; color:#fff;"></span>
+                        <span id="termBadge" style="display:none; background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600; color:#fff;"></span>
+                    </div>
+                    <p class="profile-since" style="margin-top:6px;">Fetched live from UMS &nbsp;·&nbsp; <span id="fetchTime"></span></p>
+                </div>
+            </div>
+            <div class="hero-ring-wrap">
+                <div class="overall-ring">
+                    <svg viewBox="0 0 160 160" class="ring-svg">
+                        <circle cx="80" cy="80" r="68" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="12"/>
+                        <circle id="ringArc" cx="80" cy="80" r="68" fill="none" stroke="#10B981" stroke-width="12"
+                            stroke-linecap="round" stroke-dasharray="427.26" stroke-dashoffset="427.26"
+                            transform="rotate(-90 80 80)" style="transition:stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1),stroke .4s"/>
+                    </svg>
+                    <div class="ring-label"><span id="overallPct" class="ring-pct">–%</span><small>Aggregate</small></div>
+                </div>
+                <span id="heroStatusBadge" class="hero-badge">–</span>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat"><span id="heroAttended" class="hs-val">–</span><span class="hs-lbl">Attended</span></div>
+                <div class="hs-sep"></div>
+                <div class="hero-stat"><span id="heroTotal" class="hs-val">–</span><span class="hs-lbl">Total</span></div>
+                <div class="hs-sep"></div>
+                <div class="hero-stat"><span id="heroMissed" class="hs-val hs-red">–</span><span class="hs-lbl">Missed</span></div>
+                <div class="hs-sep"></div>
+                <div class="hero-stat"><span id="heroBunkBudget" class="hs-val hs-green">–</span><span class="hs-lbl">Bunk Budget</span></div>
+            </div>
+        </div>
+
+
+        <!-- YUMS info -->
+        <div class="panel" style="margin-top:32px">
+            <div class="panel-header"><span class="panel-title"><span class="panel-title-icon">🎓</span>About YUMS</span></div>
+            <div style="padding:4px 0 8px;display:flex;gap:16px;flex-wrap:wrap;">
+                <div class="yums-info-card"><div class="yums-info-icon">📋</div><div><strong>Attendance</strong><p>See all subjects, percentage, and how many you can bunk or need to attend.</p><a href="attendance.html" class="btn btn-outline btn-sm" style="margin-top:10px;display:inline-flex">View →</a></div></div>
+                <div class="yums-info-card"><div class="yums-info-icon">🧮</div><div><strong>Calculator</strong><p>3-tab calculator: bunk/need, date projection, end of semester.</p><a href="calculator.html" class="btn btn-outline btn-sm" style="margin-top:10px;display:inline-flex">Open →</a></div></div>
+                <div class="yums-info-card"><div class="yums-info-icon">🗓️</div><div><strong>Planner</strong><p>Simulate skipping N days and see the attendance impact before you bunk.</p><a href="planner.html" class="btn btn-outline btn-sm" style="margin-top:10px;display:inline-flex">Plan →</a></div></div>
+                <div class="yums-info-card"><div class="yums-info-icon">📈</div><div><strong>Trend</strong><p>Track your attendance over time with prediction for where you're headed.</p><a href="trend.html" class="btn btn-outline btn-sm" style="margin-top:10px;display:inline-flex">View →</a></div></div>
+                <div class="yums-info-card"><div class="yums-info-icon">⭐</div><div><strong>CGPA Tracker</strong><p>View grades and credits per subject, and simulate how upcoming results change your GPA.</p><a href="cgpa.html" class="btn btn-outline btn-sm" style="margin-top:10px;display:inline-flex">Track →</a></div></div>
+            </div>
+        </div>
+
+        <!-- Today's Timetable Panel -->
+        <div class="panel" style="margin-top:32px" id="timetablePanel">
+            <div class="panel-header">
+                <span class="panel-title"><span class="panel-title-icon">🕒</span>Today's Timetable</span>
+                <span id="timetableDay" style="font-size:13px;color:var(--text-3);font-weight:600">Loading...</span>
+            </div>
+            <div id="timetableList" style="display:flex;flex-direction:column;gap:8px;padding-top:12px">
+                <div style="text-align:center;padding:16px;color:var(--text-3);font-size:14px">Loading timetable...</div>
+            </div>
+        </div>
+    </main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

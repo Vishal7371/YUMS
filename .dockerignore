@@ -1,0 +1,7 @@
+node_modules
+npm-debug.log
+debug_*.html
+debug_*.json
+captcha_*.png
+test_*.js
+.env

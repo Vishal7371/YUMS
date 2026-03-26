@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YUMS – Calculator</title>
+    <link rel="manifest" href="manifest.json" /><meta name="theme-color" content="#111111" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" /></noscript>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        /* ── Setup Card ──────────────────────────────────────────── */
+        .spc-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .spc-card h2 {
+            font-size: 15px; font-weight:700; color:var(--text);
+            margin:0 0 4px; display:flex; align-items:center; gap:8px;
+        }
+        .spc-card > p { font-size:13px; color:var(--text-3); margin:0 0 20px; }
+
+        .spc-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        @media(max-width:560px){ .spc-fields { grid-template-columns:1fr; } }
+
+        .spc-field label {
+            display:block; font-size:11px; font-weight:700;
+            color:var(--text-2); margin-bottom:6px;
+            text-transform:uppercase; letter-spacing:.5px;
+        }
+        .spc-field input {
+            width:100%; background:var(--subtle); border:1px solid var(--border);
+            border-radius:10px; padding:10px 14px; color:var(--text);
+            font-size:14px; font-family:inherit; box-sizing:border-box;
+            transition:border-color .2s;
+        }
+        .spc-field input:focus { outline:none; border-color:var(--accent); }
+        .spc-field .field-hint { font-size:11px; color:var(--text-3); margin-top:4px; }
+
+        .spc-run-btn {
+            margin-top:20px; width:100%; padding:13px;
+            background:linear-gradient(135deg,#7C6BFF,#4F8EF7);
+            color:#fff; font-size:14px; font-weight:700;
+            border:none; border-radius:12px; cursor:pointer;
+            display:flex; align-items:center; justify-content:center; gap:8px;
+            transition:opacity .2s, transform .1s;
+        }
+        .spc-run-btn:hover{opacity:.9;} .spc-run-btn:active{transform:scale(.98);}
+
+        /* ── Timetable detected badge ───────────────────────────── */
+        .tt-badge {
+            display:inline-flex; align-items:center; gap:6px;
+            background:rgba(45,212,163,.12); color:var(--green);
+            border:1px solid rgba(45,212,163,.25);
+            border-radius:8px; padding:6px 12px;
+            font-size:12px; font-weight:600; margin-bottom:14px;
+        }
+        .tt-badge.warn { background:rgba(245,197,66,.12); color:var(--yellow); border-color:rgba(245,197,66,.2); }
+
+        /* ── Summary banner ─────────────────────────────────────── */
+        .sem-summary-banner {
+            background:var(--card); border:1px solid var(--border);
+            border-radius:16px; padding:20px 24px;
+            display:flex; flex-wrap:wrap; gap:24px; margin-bottom:16px;
+        }
+        .sem-stat { display:flex; flex-direction:column; gap:3px; }
+        .sem-stat-val { font-size:26px; font-weight:800; line-height:1; }
+        .sem-stat-lbl { font-size:11px; color:var(--text-3); text-transform:uppercase; letter-spacing:.5px; }
+
+        /* ── Per-subject result cards ───────────────────────────── */
+        .sem-results { display:flex; flex-direction:column; gap:14px; }
+
+        .src-card {
+            background:var(--card); border:1px solid var(--border);
+            border-radius:14px; padding:18px 20px;
+        }
+        .src-card.safe   { border-left:3px solid var(--green); }
+        .src-card.warn   { border-left:3px solid var(--yellow); }
+        .src-card.danger { border-left:3px solid var(--red); }
+        .src-card.impossible { border-left:3px solid #666; }
+
+        .src-top {
+            display:flex; justify-content:space-between; align-items:flex-start;
+            gap:12px; margin-bottom:14px;
+        }
+        .src-name { font-size:14px; font-weight:700; color:var(--text); line-height:1.3; }
+        .src-sub  { font-size:11px; color:var(--text-3); margin-top:3px; }
+        .src-pct  { font-size:22px; font-weight:800; flex-shrink:0; }
+        .src-pct.safe   { color:var(--green); }
+        .src-pct.warn   { color:var(--yellow); }
+        .src-pct.danger { color:var(--red); }
+
+        /* Projection range bar */
+        .src-bar-wrap { margin:6px 0 14px; }
+        .src-bar-labels {
+            display:flex; justify-content:space-between;
+            font-size:11px; color:var(--text-3); margin-bottom:4px;
+        }
+        .src-bar-track {
+            position:relative; height:10px;
+            background:rgba(255,255,255,.07); border-radius:8px;
+        }
+        .src-bar-fill-best {
+            position:absolute; top:0; left:0; height:100%;
+            background:rgba(45,212,163,.35); border-radius:8px;
+        }
+        .src-bar-fill-worst {
+            position:absolute; top:0; left:0; height:100%;
+            background:rgba(255,107,138,.4); border-radius:8px;
+        }
+        .src-bar-target {
+            position:absolute; top:-4px; width:2px; height:18px;
+            background:var(--yellow); border-radius:2px; transform:translateX(-50%);
+        }
+
+        /* Stats chips */
+        .src-chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+        .src-chip {
+            background:rgba(255,255,255,.05); border-radius:8px;
+            padding:6px 10px; font-size:12px; color:var(--text-2);
+            display:flex; align-items:center; gap:5px;
+        }
+        .src-chip strong { color:var(--text); font-weight:700; }
+
+        /* Verdict */
+        .src-verdict {
+            padding:10px 14px; border-radius:10px;
+            font-size:13px; font-weight:600; line-height:1.5;
+        }
+        .src-verdict.safe { background:rgba(45,212,163,.1); color:var(--green); }
+        .src-verdict.warn { background:rgba(245,197,66,.1); color:var(--yellow); }
+        .src-verdict.danger { background:rgba(255,107,138,.1); color:var(--red); }
+        .src-verdict.impossible { background:rgba(100,100,100,.1); color:var(--text-3); }
+
+        /* No data */
+        .calc-empty {
+            text-align:center; padding:48px 24px;
+            background:var(--card); border:1px solid var(--border);
+            border-radius:16px; color:var(--text-3);
+        }
+        .calc-empty span { font-size:44px; display:block; margin-bottom:12px; }
+    </style>
+</head>
+<body class="dashboard-body">
+<div id="toastContainer" class="toast-container"></div>
+<aside class="sidebar">
+    <div class="sidebar-brand"><div class="sidebar-logo">🎓</div><span class="sidebar-name">YUMS</span></div>
+    <nav class="sidebar-nav">
+        <span class="sidebar-section-label">Menu</span>
+        <a class="sidebar-nav-item" href="dashboard.html"><span class="sidebar-nav-icon">🏠</span>Home</a>
+        <a class="sidebar-nav-item" href="attendance.html"><span class="sidebar-nav-icon">📋</span>Attendance</a>
+        <a class="sidebar-nav-item active" href="calculator.html"><span class="sidebar-nav-icon">🧮</span>Calculator</a>
+        <a class="sidebar-nav-item" href="planner.html"><span class="sidebar-nav-icon">🗓️</span>Planner</a>
+        <a class="sidebar-nav-item" href="trend.html"><span class="sidebar-nav-icon">📈</span>Trend</a>
+        <a class="sidebar-nav-item" href="cgpa.html"><span class="sidebar-nav-icon">⭐</span>CGPA</a>
+        <span class="sidebar-section-label">Settings</span>
+        <button class="sidebar-nav-item" onclick="toggleTheme()"><span class="sidebar-nav-icon" id="themeIcon">🌙</span><span id="themeLabel">Dark Mode</span></button>
+    </nav>
+    <div class="sidebar-footer">
+        <button id="refreshBtn" class="sidebar-nav-item" style="color:rgba(255,255,255,0.45)"><span class="sidebar-nav-icon">↻</span>Refresh Data</button>
+        <button id="logoutBtn" class="sidebar-nav-item" style="color:#FCA5A5"><span class="sidebar-nav-icon">🚪</span>Logout</button>
+    </div>
+</aside>
+<div class="content-area">
+    <header class="topbar">
+        <div class="topbar-left"><h1>Calculator</h1><p>Semester-end attendance projector</p></div>
+        <div class="topbar-right">
+            <div class="user-chip">
+                <div class="user-avatar" id="topbarAvatar">V</div>
+                <div class="user-info"><span class="user-name" id="topbarName">Loading…</span><span class="user-role" id="topbarRole">LPU Student</span></div>
+            </div>
+        </div>
+    </header>
+    <main class="main-content" id="calculatorPage">
+        <div class="welcome-strip">
+            <h2>📊 Semester Attendance Projector</h2>
+            <p>Auto-reads your timetable to count how many times each subject meets per week. Set end date and target — I'll tell you exactly where you'll land.</p>
+        </div>
+
+        <!-- SETUP FORM -->
+        <div class="spc-card">
+            <h2>⚙️ Settings</h2>
+            <p>Your timetable and attendance data are loaded automatically from UMS.</p>
+
+            <!-- timetable detection status -->
+            <div id="ttStatusBadge"></div>
+
+            <div class="spc-fields">
+                <div class="spc-field">
+                    <label>📅 Semester End Date</label>
+                    <input type="date" id="semEndDate" oninput="saveSemEndDate(this.value); runSemCalc()" />
+                    <div class="field-hint">The last day of regular classes (not exam date)</div>
+                </div>
+                <div class="spc-field">
+                    <label>🎯 Target Attendance %</label>
+                    <input type="number" id="semTarget" min="1" max="100" value="75" oninput="runSemCalc()" />
+                    <div class="field-hint">LPU minimum is 75%. Set higher for a safety buffer.</div>
+                </div>
+
+            </div>
+            <button class="spc-run-btn" onclick="runSemCalc()">
+                ⚡ Calculate Projections
+            </button>
+        </div>
+
+        <!-- RESULTS AREA -->
+        <div id="semResultsWrapper"></div>
+    </main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
