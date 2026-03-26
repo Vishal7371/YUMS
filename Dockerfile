@@ -5,13 +5,15 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
 
 WORKDIR /app
 
-# Copy server files
-COPY server/package*.json ./
-RUN npm ci --only=production
+# Copy and install server dependencies
+COPY server/package*.json ./server/
+RUN cd server && npm ci --only=production
 
-COPY server/ ./
+# Copy server and client code
+COPY server/ ./server/
 COPY client/ ./client/
 
 EXPOSE 3001
 
+WORKDIR /app/server
 CMD ["node", "index.js"]
