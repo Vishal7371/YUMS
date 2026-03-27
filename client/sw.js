@@ -1,9 +1,14 @@
-const CACHE = 'yums-v5';
-const SHELL = [
-    '/index.html', '/dashboard.html', '/attendance.html',
-    '/calculator.html', '/trend.html', '/planner.html',
-    '/app.js', '/style.css', '/manifest.json'
+const CACHE = 'yums-v6';
+
+// Detect base path: '/YUMS/' on GitHub Pages, '/' locally
+const BASE = self.location.pathname.replace(/sw\.js$/, '');
+
+const SHELL_FILES = [
+    'index.html', 'dashboard.html', 'attendance.html',
+    'calculator.html', 'trend.html', 'planner.html',
+    'app.js', 'style.css', 'manifest.json'
 ];
+const SHELL = SHELL_FILES.map(f => BASE + f);
 
 self.addEventListener('install', e => {
     e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)));
@@ -22,6 +27,7 @@ self.addEventListener('fetch', e => {
     const url = new URL(e.request.url);
     if (
         url.pathname.startsWith('/api/') ||
+        url.hostname.includes('onrender.com') ||
         url.origin !== self.location.origin ||
         e.request.headers.get('accept')?.includes('text/event-stream')
     ) {
@@ -46,14 +52,13 @@ self.addEventListener('push', e => {
     e.waitUntil(
         self.registration.showNotification(data.title, {
             body: data.body,
-            icon: '/icon-192.png',
-            tag: 'yums-push',
-            badge: '/icon-192.png'
+            icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🎓</text></svg>',
+            tag: 'yums-push'
         })
     );
 });
 
 self.addEventListener('notificationclick', e => {
     e.notification.close();
-    e.waitUntil(clients.openWindow('/dashboard.html'));
+    e.waitUntil(clients.openWindow(BASE + 'dashboard.html'));
 });

@@ -1,4 +1,6 @@
-const API_BASE = 'http://localhost:3001/api';
+const API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+    ? 'http://localhost:3001/api'
+    : 'https://yums-server.onrender.com/api';
 const TREND_KEY = 'yums_trend';
 
 /* ── Helpers ── */
@@ -37,7 +39,7 @@ applyTheme(localStorage.getItem('yums_theme') || 'dark');
 /* ── PWA Service Worker ── */
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(() => { });
+        navigator.serviceWorker.register('sw.js').catch(() => { });
     });
 }
 
@@ -913,7 +915,9 @@ function runSemCalc() {
     // ── Summary ──
     const totalAtt  = subjects.reduce((a, s) => a + s.attended, 0);
     const totalHeld = subjects.reduce((a, s) => a + s.total, 0);
-    const overallNow  = totalHeld > 0 ? (totalAtt / totalHeld * 100).toFixed(1) : '0';
+    const umsOverall = sessionStorage.getItem('yums_overallPct') || localStorage.getItem('yums_overallPct');
+    const overallNow  = (umsOverall && umsOverall !== '') ? umsOverall
+        : (totalHeld > 0 ? (totalAtt / totalHeld * 100).toFixed(1) : '0');
     const safeCount   = subjects.filter(s => s.percentage >= 75).length;
     const dangerCount = subjects.filter(s => s.percentage < 65).length;
     const overallColor = parseFloat(overallNow) >= 75 ? 'var(--green)' : parseFloat(overallNow) >= 65 ? 'var(--yellow)' : 'var(--red)';
