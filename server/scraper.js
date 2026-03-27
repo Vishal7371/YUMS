@@ -69,8 +69,9 @@ function launchBrowser() {
       '--disable-dev-shm-usage',
       '--disable-software-rasterizer',
       '--no-zygote',
-      '--single-process',
-      ...(isDocker ? [] : ['--start-maximized']),
+      ...(isDocker
+        ? ['--headless=new', '--ozone-platform=headless']
+        : ['--start-maximized']),
     ],
   });
 }
