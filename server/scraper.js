@@ -56,14 +56,21 @@ const SEL = {
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 function launchBrowser() {
+  const isDocker = !!process.env.PUPPETEER_EXECUTABLE_PATH;
   return puppeteer.launch({
-    headless: false,
-    defaultViewport: null,
+    headless: isDocker ? 'new' : false,
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+    defaultViewport: isDocker ? { width: 1280, height: 900 } : null,
     args: [
-      '--start-maximized',
       '--no-sandbox',
       '--disable-setuid-sandbox',
       '--disable-blink-features=AutomationControlled',
+      '--disable-gpu',
+      '--disable-dev-shm-usage',
+      '--disable-software-rasterizer',
+      '--no-zygote',
+      '--single-process',
+      ...(isDocker ? [] : ['--start-maximized']),
     ],
   });
 }
