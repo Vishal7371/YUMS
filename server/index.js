@@ -45,7 +45,7 @@ app.get('/api/login/stream', async (req, res) => {
         return res.end();
     }
 
-    const { regNo = '' } = req.query;
+    const { regNo = '', password = '' } = req.query;
 
     // SSE headers
     res.writeHead(200, {
@@ -87,7 +87,7 @@ app.get('/api/login/stream', async (req, res) => {
             send('progress', { msg });
         };
 
-        const finalData = await loginAndFetchAttendance({ regNo, onAttendance, onProgress });
+        const finalData = await loginAndFetchAttendance({ regNo, password, onAttendance, onProgress });
         send('done', finalData);
 
     } catch (err) {

@@ -545,7 +545,35 @@ async function loginAndFetchAttendance({ regNo = '', password = '', onAttendance
       await loginPage.goto(UMS_LOGIN, { waitUntil: 'domcontentloaded', timeout: 30000 });
       await sleep(2000);
 
-      progress('✋ Please log in with your credentials in the browser window');
+      // ── Headless auto-login: fill credentials + solve CAPTCHA ──────────
+      if (password) {
+        progress('🔑 Filling credentials…');
+        await autofillCredentials(loginPage, regNo, password);
+        await sleep(500);
+
+        progress('🧩 Solving CAPTCHA…');
+        const captchaSolved = await fillAndSubmitCaptcha(loginPage);
+        if (captchaSolved) {
+          progress('⏳ Waiting for UMS dashboard…');
+        } else {
+          progress('⚠️ CAPTCHA auto-solve failed — retrying…');
+          // Retry: reload and try again
+          for (let retry = 0; retry < 2; retry++) {
+            await sleep(2000);
+            const currentUrl = (loginPage.url() || '').toLowerCase();
+            if (currentUrl.includes('studentdashboard') || currentUrl.includes('default3')) break;
+            // If still on login page, re-fill and retry CAPTCHA
+            if (currentUrl.includes('loginnew') || currentUrl.includes('login')) {
+              progress(`🔄 Retry ${retry + 1}: re-filling credentials…`);
+              await autofillCredentials(loginPage, regNo, password);
+              await sleep(500);
+              await fillAndSubmitCaptcha(loginPage);
+            }
+          }
+        }
+      } else {
+        progress('✋ Please log in with your credentials in the browser window');
+      }
 
       progress('⏳ Waiting for UMS dashboard…');
       dashPage = await waitForDashboard(browser, 180000);
