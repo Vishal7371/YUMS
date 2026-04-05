@@ -26,12 +26,21 @@
     <div id="loginError" class="error-msg hidden"></div>
     <div id="loginInfo"  class="info-msg  hidden"></div>
 
-    <button id="loginBtn" class="btn btn-primary login-minimal-btn" onclick="startLogin()">
-      <span id="loginBtnText">Login with UMS</span>
-      <span id="loginSpinner" class="spinner hidden"></span>
-    </button>
+    <form autocomplete="off" onsubmit="event.preventDefault(); startLogin();">
+      <!-- Hidden honeypot to prevent browser autofill from injecting password fields -->
+      <input type="text" name="prevent_autofill_name" style="display:none" tabindex="-1" />
+      <input type="password" name="prevent_autofill_pass" style="display:none" tabindex="-1" />
 
-    <p class="privacy-note">🔒 Your password is <strong>never</strong> stored — you enter it in the UMS window.</p>
+      <input id="regNoInput" type="text" class="login-input" placeholder="Registration Number"
+             autocomplete="off" inputmode="numeric" spellcheck="false" />
+
+      <button id="loginBtn" type="submit" class="btn btn-primary login-minimal-btn">
+        <span id="loginBtnText">Login with UMS</span>
+        <span id="loginSpinner" class="spinner hidden"></span>
+      </button>
+    </form>
+
+    <p class="privacy-note">🔒 Your credentials are sent securely to fetch your data and are <strong>never</strong> stored.</p>
   </div>
 
   <script src="app.js"></script>

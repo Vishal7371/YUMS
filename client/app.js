@@ -87,11 +87,12 @@ function initPageHeader() {
 
     $('logoutBtn')?.addEventListener('click', () => {
         sessionStorage.clear();
-        ['yums_name', 'yums_program', 'yums_subjects', 'yums_overallPct', 'yums_fetched', 'yums_fetchedTs', 'yums_grades']
+        ['yums_regNo', 'yums_name', 'yums_program', 'yums_subjects', 'yums_overallPct', 'yums_fetched', 'yums_fetchedTs', 'yums_grades']
             .forEach(k => localStorage.removeItem(k));
         window.location.href = 'index.html';
     });
     $('refreshBtn')?.addEventListener('click', () => {
+        const btn = $('refreshBtn');
         const regNo = sessionStorage.getItem('yums_regNo') || localStorage.getItem('yums_regNo');
         if (!regNo) {
             toast('Session expired. Please log in again.', 'error');
@@ -194,14 +195,26 @@ async function startLogin() {
     const errorDiv = $('loginError');
     const infoDiv  = $('loginInfo');
 
+    const regNo = ($('regNoInput')?.value || '').trim();
+
+    if (!regNo) {
+        errorDiv.textContent = 'Please enter your registration number.';
+        show('loginError');
+        return;
+    }
+
+    // Save regNo so refresh/auto-refresh can use it later
+    sessionStorage.setItem('yums_regNo', regNo);
+    localStorage.setItem('yums_regNo', regNo);
+
     hide('loginError');
     $('loginBtn').disabled = true;
-    $('loginBtnText').textContent = 'Opening UMS…';
+    $('loginBtnText').textContent = 'Logging in…';
     show('loginSpinner');
-    infoDiv.innerHTML = '🌐 <strong>Opening UMS…</strong> Log in with your credentials in the browser window.';
+    infoDiv.innerHTML = '🌐 <strong>Connecting to UMS…</strong> This may take a moment.';
     show('loginInfo');
 
-    const url = `${API_BASE}/login/stream`;
+    const url = `${API_BASE}/login/stream?regNo=${encodeURIComponent(regNo)}`;
     const es = new EventSource(url);
 
     es.addEventListener('progress', (e) => {
@@ -217,10 +230,13 @@ async function startLogin() {
             const data = JSON.parse(e.data);
             const fetchedAt = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
             const fetchedTs = Date.now();
-            const regNo = data.regNo || '';
+            const serverRegNo = data.regNo || '';
+            const storedRegNo = sessionStorage.getItem('yums_regNo') || localStorage.getItem('yums_regNo') || '';
+            const effectiveRegNo = serverRegNo || storedRegNo;
             const displayName = (data.name && data.name.trim() && data.name !== 'LPU Student')
-                ? data.name : (regNo || 'LPU Student');
+                ? data.name : (effectiveRegNo || 'LPU Student');
             const keys = {
+                yums_regNo: effectiveRegNo,
                 yums_name: displayName,
                 yums_program: data.program || '',
                 yums_subjects: JSON.stringify(data.subjects || []),

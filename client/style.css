@@ -723,6 +723,62 @@ body {
   animation: slideDown 0.3s ease;
 }
 
+/* Login input field (minimal login) */
+.login-input {
+  width: 100%;
+  padding: 14px 18px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  transition: border-color var(--dur), box-shadow var(--dur), background var(--dur);
+  font-family: 'Inter', sans-serif;
+  text-align: center;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.login-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(124, 107, 255, 0.15);
+}
+
+.login-input::placeholder {
+  color: var(--text-3);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+[data-theme="dark"] .login-input {
+  background: #1a1d27;
+  border-color: #2a2d3a;
+  color: #f0f0f5;
+}
+
+[data-theme="dark"] .login-input:focus {
+  border-color: #7C6BFF;
+  box-shadow: 0 0 0 3px rgba(124, 107, 255, 0.2);
+}
+
+/* Prevent browser autofill from injecting extra fields or ugly styling */
+.login-input:-webkit-autofill,
+.login-input:-webkit-autofill:hover,
+.login-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 40px var(--surface) inset !important;
+  -webkit-text-fill-color: var(--text) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+[data-theme="dark"] .login-input:-webkit-autofill,
+[data-theme="dark"] .login-input:-webkit-autofill:hover,
+[data-theme="dark"] .login-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 40px #1a1d27 inset !important;
+  -webkit-text-fill-color: #f0f0f5 !important;
+}
+
 /* ══════════════════════════════════════════════
    DASHBOARD LAYOUT — SIDEBAR + CONTENT
 ══════════════════════════════════════════════ */
